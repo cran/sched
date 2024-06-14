@@ -1,0 +1,129 @@
+---
+title: "Introduction to sched package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to sched package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+*sched* helps sending SOAP or regular requests to web servers, while respecting
+a maximum requesting frequency, as stated by web sites for the usage of their
+web services.
+
+*sched* uses [fscache](https://CRAN.R-project.org/package=fscache) package to
+store returned contents of requests, reusing them automatically when the same
+request is run again.
+
+Requests are sent through the use of an instance of the `Scheduler` class.
+
+## Initializing the scheduler
+
+To get an instance of a scheduler, we use the `Scheduler` class as following:
+```{r}
+scheduler <- sched::Scheduler$new(cache_dir = NULL,
+                                  user_agent = "sched ; pierrick.roger@cea.fr")
+```
+Be sure to set a user agent, since this is what will identify your application
+to the web site. Some web site may reject requests because of an empty user
+agent.
+
+For this vignette we disable the cache folder by setting `cache_dir` to `NULL`.
+By default it is set to `sched` folder inside the default user cache folder on the
+system. It is however strongly recommended to set it to a folder named after your
+application. Example:
+`sched::Scheduler$new(cache_dir=tools::R_user_dir("my.app", which = "cache"))`.
+
+## Sending a request to a web service
+
+To send a request to a web service and retrieve the content of the response, we
+use the `sendRequest()` method.
+
+Inside `sendRequest()`, the scheduler will automatically limit the access
+frequency to the domain name. This means that the call to `sendRequest()` may
+block sometime, doing nothing. This is perfectly normal.
+
+Before sending a request we must build a `Request` object that we will pass to
+`sendRequest()`.
+Using classes like `Request` and `URL` may be cumbersome for basic requests,
+but is very handy for more complex ones, like POST requests.
+
+Let us a build a `URL` object and a simple `Request` object that takes only a
+URL:
+```{r}
+my_url <- sched::URL$new(
+  url = "https://www.ebi.ac.uk/webservices/chebi/2.0/test/getCompleteEntity",
+  params = c(chebiId = 15440)
+)
+
+my_request <- sched::Request$new(my_url)
+```
+
+To send the request, pass the `Request` object to the `sendRequest()` method:
+```{r}
+content <- scheduler$sendRequest(my_request)
+```
+
+Here is the XML content returned by the ChEBI web service:
+```{r}
+content
+```
+
+For building a POST request, see the documentation of the `Request` class.
+
+## Using a custom rule
+
+If no scheduling rule exists for a host name, *sched* uses a default rule of
+three requests per second (this default frequency may be changed when creating
+the `Scheduler` instance). 
+
+To define a custom rule for a host name, use the `setRule()` method:
+```{r}
+scheduler$setRule("www.ebi.ac.uk", n = 7, lap = 2)
+```
+This call defines a new rule for domain *www.ebi.ac.uk*, that limits the number
+of request to 7 every 2 seconds.
+Note that the time lap is a sliding window, and *sched* registers the time of
+the requests.
+So supposing 7 requests have already been run during the 2 seconds, the 8th
+request will be blocked, but only until the first one becomes 2 seconds old.
+
+To delete all defined rules, even the ones created automatically by *sched*,
+run:
+```{r}
+scheduler$deleteRules()
+```
+
+## Downloading a file from a URL
+
+With *sched* it is also possible to download file directly from URLs and write
+them to disk.
+
+For this demonstration, we will use a destination folder:
+```{r}
+my_temp_dir <- file.path(tempdir(), "my_temp_folder_for_sched_vignette")
+```
+
+To download a file from a URL and write it directly on disk, use the
+`downloadFile()` method:
+```{r}
+my_url <- sched::URL$new(
+  "https://gitlab.com/cnrgh/databases/r-sched/-/raw/main/README.md"
+)
+dst <- file.path(my_temp_dir, "readme.md")
+scheduler$downloadFile(my_url, dest_file = dst)
+```
+As with the `sendRequest()` method, the scheduler will use rules to limit
+access frequency to the domain name.
+
+Removal of the temporary folder:
+```{r}
+unlink(my_temp_dir, recursive = TRUE)
+```

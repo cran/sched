@@ -1,0 +1,56 @@
+---
+title: "sched package helper functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{sched package helper functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Here we present some functions, that may ease the usage of the `sched`
+package, or serve related purposes.
+
+## `make_post_request()`
+
+This function facilitates the creation of `Request` object for a POST request.
+
+Here is an example:
+```{r}
+my_url <- sched::URL$new("https://httpbin.org/anything")
+my_request <- sched::make_post_request(my_url,
+                                       body = "{\"some_key\": \"my_value\"}",
+                                       mime = "application/json")
+```
+
+The `Request` object can then be used inside an URL request function:
+```{r}
+res <- sched::get_url_request_result(my_request)
+res$getContent()
+```
+
+## `get_url_request_result()`
+
+This function is a plain URL requester, that do **not** use the
+**scheduling system** of the package.
+It is presented here as a convenience.
+
+The function takes a `sched::Request` object as input, along with standard
+parameters like:
+
+ * The user agent.
+ * A flag to enable/disable SSL verify peer. Enabled by default.
+ * A flag to enable/disable binary mode. Disabled by default.
+
+Here is an example of usage:
+```{r}
+my_url <- sched::URL$new("https://httpbin.org/get")
+my_request <- sched::Request$new(my_url)
+sched::get_url_request_result(my_request)
+```

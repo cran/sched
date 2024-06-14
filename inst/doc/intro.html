@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Introduction to sched package</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to sched package</h1>
+
+
+
+<p><em>sched</em> helps sending SOAP or regular requests to web servers,
+while respecting a maximum requesting frequency, as stated by web sites
+for the usage of their web services.</p>
+<p><em>sched</em> uses <a href="https://CRAN.R-project.org/package=fscache">fscache</a> package to
+store returned contents of requests, reusing them automatically when the
+same request is run again.</p>
+<p>Requests are sent through the use of an instance of the
+<code>Scheduler</code> class.</p>
+<div id="initializing-the-scheduler" class="section level2">
+<h2>Initializing the scheduler</h2>
+<p>To get an instance of a scheduler, we use the <code>Scheduler</code>
+class as following:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>scheduler <span class="ot">&lt;-</span> sched<span class="sc">::</span>Scheduler<span class="sc">$</span><span class="fu">new</span>(<span class="at">cache_dir =</span> <span class="cn">NULL</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>                                  <span class="at">user_agent =</span> <span class="st">&quot;sched ; pierrick.roger@cea.fr&quot;</span>)</span></code></pre></div>
+<p>Be sure to set a user agent, since this is what will identify your
+application to the web site. Some web site may reject requests because
+of an empty user agent.</p>
+<p>For this vignette we disable the cache folder by setting
+<code>cache_dir</code> to <code>NULL</code>. By default it is set to
+<code>sched</code> folder inside the default user cache folder on the
+system. It is however strongly recommended to set it to a folder named
+after your application. Example:
+<code>sched::Scheduler$new(cache_dir=tools::R_user_dir(&quot;my.app&quot;, which = &quot;cache&quot;))</code>.</p>
+</div>
+<div id="sending-a-request-to-a-web-service" class="section level2">
+<h2>Sending a request to a web service</h2>
+<p>To send a request to a web service and retrieve the content of the
+response, we use the <code>sendRequest()</code> method.</p>
+<p>Inside <code>sendRequest()</code>, the scheduler will automatically
+limit the access frequency to the domain name. This means that the call
+to <code>sendRequest()</code> may block sometime, doing nothing. This is
+perfectly normal.</p>
+<p>Before sending a request we must build a <code>Request</code> object
+that we will pass to <code>sendRequest()</code>. Using classes like
+<code>Request</code> and <code>URL</code> may be cumbersome for basic
+requests, but is very handy for more complex ones, like POST
+requests.</p>
+<p>Let us a build a <code>URL</code> object and a simple
+<code>Request</code> object that takes only a URL:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>my_url <span class="ot">&lt;-</span> sched<span class="sc">::</span>URL<span class="sc">$</span><span class="fu">new</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>  <span class="at">url =</span> <span class="st">&quot;https://www.ebi.ac.uk/webservices/chebi/2.0/test/getCompleteEntity&quot;</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  <span class="at">params =</span> <span class="fu">c</span>(<span class="at">chebiId =</span> <span class="dv">15440</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>my_request <span class="ot">&lt;-</span> sched<span class="sc">::</span>Request<span class="sc">$</span><span class="fu">new</span>(my_url)</span></code></pre></div>
+<p>To send the request, pass the <code>Request</code> object to the
+<code>sendRequest()</code> method:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>content <span class="ot">&lt;-</span> scheduler<span class="sc">$</span><span class="fu">sendRequest</span>(my_request)</span></code></pre></div>
+<p>Here is the XML content returned by the ChEBI web service:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>content</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;&lt;?xml version=&#39;1.0&#39; encoding=&#39;UTF-8&#39;?&gt;&lt;S:Envelope xmlns:S=\&quot;http://schemas.xmlsoap.org/soap/envelope/\&quot;&gt;&lt;S:Body&gt;&lt;getCompleteEntityResponse xmlns=\&quot;https://www.ebi.ac.uk/webservices/chebi\&quot;&gt;&lt;return&gt;&lt;chebiId&gt;CHEBI:15440&lt;/chebiId&gt;&lt;chebiAsciiName&gt;squalene&lt;/chebiAsciiName&gt;&lt;definition&gt;A triterpene consisting of 2,6,10,15,19,23-hexamethyltetracosane having six double bonds at the 2-, 6-, 10-, 14-, 18- and 22-positions with (all-E)-configuration.&lt;/definition&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;smiles&gt;CC(C)=CCC\\C(C)=C\\CC\\C(C)=C\\CC\\C=C(/C)CC\\C=C(/C)CCC=C(C)C&lt;/smiles&gt;&lt;inchi&gt;InChI=1S/C30H50/c1-25(2)15-11-19-29(7)23-13-21-27(5)17-9-10-18-28(6)22-14-24-30(8)20-12-16-26(3)4/h15-18,23-24H,9-14,19-22H2,1-8H3/b27-17+,28-18+,29-23+,30-24+&lt;/inchi&gt;&lt;inchiKey&gt;YYGNTYWPHWGJRM-AAJYLUCBSA-N&lt;/inchiKey&gt;&lt;charge&gt;0&lt;/charge&gt;&lt;mass&gt;410.730&lt;/mass&gt;&lt;monoisotopicMass&gt;410.39125&lt;/monoisotopicMass&gt;&lt;entityStar&gt;3&lt;/entityStar&gt;&lt;SecondaryChEBIIds&gt;CHEBI:10843&lt;/SecondaryChEBIIds&gt;&lt;SecondaryChEBIIds&gt;CHEBI:9245&lt;/SecondaryChEBIIds&gt;&lt;SecondaryChEBIIds&gt;CHEBI:10795&lt;/SecondaryChEBIIds&gt;&lt;SecondaryChEBIIds&gt;CHEBI:15104&lt;/SecondaryChEBIIds&gt;&lt;SecondaryChEBIIds&gt;CHEBI:26746&lt;/SecondaryChEBIIds&gt;&lt;Synonyms&gt;&lt;data&gt;(all-E)-2,6,10,15,19,23-hexamethyl-2,6,10,14,18,22-tetracosahexaene&lt;/data&gt;&lt;type&gt;SYNONYM&lt;/type&gt;&lt;source&gt;NIST Chemistry WebBook&lt;/source&gt;&lt;/Synonyms&gt;&lt;Synonyms&gt;&lt;data&gt;Spinacene&lt;/data&gt;&lt;type&gt;SYNONYM&lt;/type&gt;&lt;source&gt;KEGG COMPOUND&lt;/source&gt;&lt;/Synonyms&gt;&lt;Synonyms&gt;&lt;data&gt;Squalene&lt;/data&gt;&lt;type&gt;SYNONYM&lt;/type&gt;&lt;source&gt;KEGG COMPOUND&lt;/source&gt;&lt;/Synonyms&gt;&lt;Synonyms&gt;&lt;data&gt;squalene&lt;/data&gt;&lt;type&gt;SYNONYM&lt;/type&gt;&lt;source&gt;UniProt&lt;/source&gt;&lt;/Synonyms&gt;&lt;Synonyms&gt;&lt;data&gt;Supraene&lt;/data&gt;&lt;type&gt;SYNONYM&lt;/type&gt;&lt;source&gt;KEGG COMPOUND&lt;/source&gt;&lt;/Synonyms&gt;&lt;IupacNames&gt;&lt;data&gt;(6E,10E,14E,18E)-2,6,10,15,19,23-hexamethyltetracosa-2,6,10,14,18,22-hexaene&lt;/data&gt;&lt;type&gt;IUPAC NAME&lt;/type&gt;&lt;source&gt;IUPAC&lt;/source&gt;&lt;/IupacNames&gt;&lt;Formulae&gt;&lt;data&gt;C30H50&lt;/data&gt;&lt;source&gt;ChEBI&lt;/source&gt;&lt;/Formulae&gt;&lt;RegistryNumbers&gt;&lt;data&gt;111-02-4&lt;/data&gt;&lt;type&gt;CAS Registry Number&lt;/type&gt;&lt;source&gt;KEGG COMPOUND&lt;/source&gt;&lt;/RegistryNumbers&gt;&lt;RegistryNumbers&gt;&lt;data&gt;111-02-4&lt;/data&gt;&lt;type&gt;CAS Registry Number&lt;/type&gt;&lt;source&gt;ChemIDplus&lt;/source&gt;&lt;/RegistryNumbers&gt;&lt;RegistryNumbers&gt;&lt;data&gt;111-02-4&lt;/data&gt;&lt;type&gt;CAS Registry Number&lt;/type&gt;&lt;source&gt;NIST Chemistry WebBook&lt;/source&gt;&lt;/RegistryNumbers&gt;&lt;RegistryNumbers&gt;&lt;data&gt;1728920&lt;/data&gt;&lt;type&gt;Beilstein Registry Number&lt;/type&gt;&lt;source&gt;Beilstein&lt;/source&gt;&lt;/RegistryNumbers&gt;&lt;Citations&gt;&lt;data&gt;16341241&lt;/data&gt;&lt;type&gt;PubMed citation&lt;/type&gt;&lt;source&gt;Europe PMC&lt;/source&gt;&lt;/Citations&gt;&lt;Citations&gt;&lt;data&gt;23625688&lt;/data&gt;&lt;type&gt;PubMed citation&lt;/type&gt;&lt;source&gt;Europe PMC&lt;/source&gt;&lt;/Citations&gt;&lt;Citations&gt;&lt;data&gt;24362891&lt;/data&gt;&lt;type&gt;PubMed citation&lt;/type&gt;&lt;source&gt;Europe PMC&lt;/source&gt;&lt;/Citations&gt;&lt;Citations&gt;&lt;data&gt;25286851&lt;/data&gt;&lt;type&gt;PubMed citation&lt;/type&gt;&lt;source&gt;Europe PMC&lt;/source&gt;&lt;/Citations&gt;&lt;Citations&gt;&lt;data&gt;25286853&lt;/data&gt;&lt;type&gt;PubMed citation&lt;/type&gt;&lt;source&gt;Europe PMC&lt;/source&gt;&lt;/Citations&gt;&lt;Citations&gt;&lt;data&gt;25987292&lt;/data&gt;&lt;type&gt;PubMed citation&lt;/type&gt;&lt;source&gt;Europe PMC&lt;/source&gt;&lt;/Citations&gt;&lt;ChemicalStructures&gt;&lt;structure&gt;\n  Ketcher 05282116592D 1   1.00000     0.00000     0\n\n 30 29  0     0  0            999 V2000\n    7.0643   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    7.9173   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    8.7704   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    9.6234   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   10.4765   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   11.3295   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   12.1826   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   13.0356   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   13.8887   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   14.7417   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   15.5948   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   16.5135   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   17.3666   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   18.2196   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   19.0727   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   19.9257   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   20.7788   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   21.6318   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   22.4849   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   23.3379   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   24.1909   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   25.0440   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   25.8970   -4.2268    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   26.7502   -4.7517    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    7.9173   -5.7360    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   11.3295   -5.7360    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   14.7417   -5.7360    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   19.0727   -3.2426    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   22.4849   -3.2426    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   25.8970   -3.2426    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n  2  1  1  0     0  0\n  3  2  2  0     0  0\n 25  2  1  0     0  0\n  4  3  1  0     0  0\n  5  4  1  0     0  0\n  6  5  1  0     0  0\n  7  6  2  0     0  0\n 26  6  1  0     0  0\n  8  7  1  0     0  0\n  9  8  1  0     0  0\n 10  9  1  0     0  0\n 11 10  2  0     0  0\n 27 10  1  0     0  0\n 12 11  1  0     0  0\n 13 12  1  0     0  0\n 14 13  1  0     0  0\n 15 14  2  0     0  0\n 16 15  1  0     0  0\n 28 15  1  0     0  0\n 17 16  1  0     0  0\n 18 17  1  0     0  0\n 19 18  2  0     0  0\n 20 19  1  0     0  0\n 29 19  1  0     0  0\n 21 20  1  0     0  0\n 22 21  1  0     0  0\n 23 22  2  0     0  0\n 24 23  1  0     0  0\n 30 23  1  0     0  0\nM  </span><span class="re">END</span><span class="co">\n&lt;/structure&gt;&lt;type&gt;mol&lt;/type&gt;&lt;dimension&gt;2D&lt;/dimension&gt;&lt;defaultStructure&gt;true&lt;/defaultStructure&gt;&lt;/ChemicalStructures&gt;&lt;ChemicalStructures&gt;&lt;structure&gt;SQL - Ideal conformer\n  Mrv1927 05282116593D          \n\n 80 79  0  0  0  0            999 V2000\n  -10.3140    1.3190   -1.3860 C   0  0  0  0  0  0  0  0  0  0  0  0\n  -10.9120    0.1620   -0.6270 C   0  0  0  0  0  0  0  0  0  0  0  0\n  -12.3920    0.1310   -0.3440 C   0  0  0  0  0  0  0  0  0  0  0  0\n  -10.1450   -0.8160   -0.2130 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -8.6500   -0.7260   -0.3840 C   0  0  1  0  0  0  0  0  0  0  0  0\n   -7.9680   -0.9340    0.9690 C   0  0  1  0  0  0  0  0  0  0  0  0\n   -6.4740   -0.8440    0.7980 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -5.6890   -2.0600    0.3780 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -5.8570    0.2920    1.0130 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -4.3520    0.3530    0.9630 C   0  0  1  0  0  0  0  0  0  0  0  0\n   -3.9190    1.4360   -0.0270 C   0  0  1  0  0  0  0  0  0  0  0  0\n   -2.4140    1.4980   -0.0780 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.6590    2.3220    0.9330 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.7620    0.8340   -1.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.2550    0.8030   -0.9830 C   0  0  1  0  0  0  0  0  0  0  0  0\n    0.2250   -0.6500   -0.9920 C   0  0  1  0  0  0  0  0  0  0  0  0\n    1.7310   -0.6820   -0.9750 C   0  0  0  0  0  0  0  0  0  0  0  0\n    2.3620   -1.3530   -0.0430 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.5810   -2.1310    0.9840 C   0  0  0  0  0  0  0  0  0  0  0  0\n    3.8680   -1.3460    0.0020 C   0  0  1  0  0  0  0  0  0  0  0  0\n    4.3450   -0.2630    0.9710 C   0  0  1  0  0  0  0  0  0  0  0  0\n    5.8510   -0.2560    1.0160 C   0  0  0  0  0  0  0  0  0  0  0  0\n    6.5090    0.8490    0.7660 C   0  0  0  0  0  0  0  0  0  0  0  0\n    8.0040    0.8930    0.9500 C   0  0  1  0  0  0  0  0  0  0  0  0\n    8.6920    0.6130   -0.3870 C   0  0  1  0  0  0  0  0  0  0  0  0\n   10.1870    0.6580   -0.2030 C   0  0  0  0  0  0  0  0  0  0  0  0\n   10.9280   -0.3400   -0.6180 C   0  0  0  0  0  0  0  0  0  0  0  0\n   12.3990   -0.3720   -0.2920 C   0  0  0  0  0  0  0  0  0  0  0  0\n   10.3100   -1.4540   -1.4220 C   0  0  0  0  0  0  0  0  0  0  0  0\n    5.7710    2.0750    0.2940 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -9.7650    0.9420   -2.2490 H   0  0  0  0  0  0  0  0  0  0  0  0\n  -11.1100    1.9820   -1.7240 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -9.6340    1.8680   -0.7350 H   0  0  0  0  0  0  0  0  0  0  0  0\n  -12.9070   -0.3760   -1.1600 H   0  0  0  0  0  0  0  0  0  0  0  0\n  -12.5720   -0.4050    0.5880 H   0  0  0  0  0  0  0  0  0  0  0  0\n  -12.7660    1.1500   -0.2550 H   0  0  0  0  0  0  0  0  0  0  0  0\n  -10.5840   -1.6860    0.2520 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -8.3180   -1.4950   -1.0810 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -8.3010   -0.1640    1.6660 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -6.3750   -2.8790    0.1650 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -5.1100   -1.8280   -0.5160 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -5.0130   -2.3520    1.1820 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -6.4270    1.1840    1.2280 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.9640    0.5900    1.9540 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -4.3060    1.1990   -1.0180 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.3590    2.7400    1.6570 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.9350    1.6910    1.4490 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.1370    3.1320    0.4230 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.3040    0.3100   -1.7730 H   0  0  0  0  0  0  0  0  0  0  0  0\n    0.1290    1.3170   -1.8640 H   0  0  0  0  0  0  0  0  0  0  0  0\n    0.1080    1.3000   -0.0840 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.1600   -1.1650   -0.1110 H   0  0  0  0  0  0  0  0  0  0  0  0\n    2.2910   -0.1510   -1.7300 H   0  0  0  0  0  0  0  0  0  0  0  0\n    1.3420   -3.1180    0.5880 H   0  0  0  0  0  0  0  0  0  0  0  0\n    2.1780   -2.2380    1.8900 H   0  0  0  0  0  0  0  0  0  0  0  0\n    0.6580   -1.6000    1.2180 H   0  0  0  0  0  0  0  0  0  0  0  0\n    4.2260   -2.3190    0.3400 H   0  0  0  0  0  0  0  0  0  0  0  0\n    3.9870    0.7100    0.6330 H   0  0  0  0  0  0  0  0  0  0  0  0\n    6.3880   -1.1630    1.2530 H   0  0  0  0  0  0  0  0  0  0  0  0\n    8.2970    1.8800    1.3090 H   0  0  0  0  0  0  0  0  0  0  0  0\n    8.3990   -0.3740   -0.7470 H   0  0  0  0  0  0  0  0  0  0  0  0\n    8.3920    1.3680   -1.1150 H   0  0  0  0  0  0  0  0  0  0  0  0\n   10.6470    1.5120    0.2710 H   0  0  0  0  0  0  0  0  0  0  0  0\n   12.5500   -0.8920    0.6540 H   0  0  0  0  0  0  0  0  0  0  0  0\n   12.9350   -0.8950   -1.0840 H   0  0  0  0  0  0  0  0  0  0  0  0\n   12.7750    0.6480   -0.2100 H   0  0  0  0  0  0  0  0  0  0  0  0\n    9.2710   -1.2100   -1.6430 H   0  0  0  0  0  0  0  0  0  0  0  0\n   10.8610   -1.5790   -2.3540 H   0  0  0  0  0  0  0  0  0  0  0  0\n   10.3510   -2.3810   -0.8490 H   0  0  0  0  0  0  0  0  0  0  0  0\n    5.4010    2.6300    1.1560 H   0  0  0  0  0  0  0  0  0  0  0  0\n    6.4470    2.7070   -0.2820 H   0  0  0  0  0  0  0  0  0  0  0  0\n    4.9310    1.7750   -0.3320 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -8.3880    0.2570   -0.7760 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -8.2310   -1.9160    1.3610 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.9600   -0.6120    0.6400 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -4.3110    2.4010    0.2950 H   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.1390   -1.1480   -1.8910 H   0  0  0  0  0  0  0  0  0  0  0  0\n    4.2600   -1.1410   -0.9940 H   0  0  0  0  0  0  0  0  0  0  0  0\n    3.9530   -0.4680    1.9670 H   0  0  0  0  0  0  0  0  0  0  0  0\n    8.3030    0.1390    1.6780 H   0  0  0  0  0  0  0  0  0  0  0  0\n  3  2  1  0  0  0  0\n  1  2  1  0  0  0  0\n  2  4  2  3  0  0  0\n  4  5  1  0  0  0  0\n  5  6  1  0  0  0  0\n  6  7  1  0  0  0  0\n  8  7  1  0  0  0  0\n  7  9  2  0  0  0  0\n  9 10  1  0  0  0  0\n 10 11  1  0  0  0  0\n 11 12  1  0  0  0  0\n 13 12  1  0  0  0  0\n 12 14  2  0  0  0  0\n 14 15  1  0  0  0  0\n 15 16  1  0  0  0  0\n 16 17  1  0  0  0  0\n 17 18  2  0  0  0  0\n 18 19  1  0  0  0  0\n 18 20  1  0  0  0  0\n 20 21  1  0  0  0  0\n 21 22  1  0  0  0  0\n 22 23  2  0  0  0  0\n 23 30  1  0  0  0  0\n 23 24  1  0  0  0  0\n 24 25  1  0  0  0  0\n 25 26  1  0  0  0  0\n 26 27  2  3  0  0  0\n 27 29  1  0  0  0  0\n 27 28  1  0  0  0  0\n  1 31  1  0  0  0  0\n  1 32  1  0  0  0  0\n  1 33  1  0  0  0  0\n  3 34  1  0  0  0  0\n  3 35  1  0  0  0  0\n  3 36  1  0  0  0  0\n  4 37  1  0  0  0  0\n  5 38  1  0  0  0  0\n  6 39  1  0  0  0  0\n  8 40  1  0  0  0  0\n  8 41  1  0  0  0  0\n  8 42  1  0  0  0  0\n  9 43  1  0  0  0  0\n 10 44  1  0  0  0  0\n 11 45  1  0  0  0  0\n 13 46  1  0  0  0  0\n 13 47  1  0  0  0  0\n 13 48  1  0  0  0  0\n 14 49  1  0  0  0  0\n 15 50  1  0  0  0  0\n 15 51  1  0  0  0  0\n 16 52  1  0  0  0  0\n 17 53  1  0  0  0  0\n 19 54  1  0  0  0  0\n 19 55  1  0  0  0  0\n 19 56  1  0  0  0  0\n 20 57  1  0  0  0  0\n 21 58  1  0  0  0  0\n 22 59  1  0  0  0  0\n 24 60  1  0  0  0  0\n 25 61  1  0  0  0  0\n 25 62  1  0  0  0  0\n 26 63  1  0  0  0  0\n 28 64  1  0  0  0  0\n 28 65  1  0  0  0  0\n 28 66  1  0  0  0  0\n 29 67  1  0  0  0  0\n 29 68  1  0  0  0  0\n 29 69  1  0  0  0  0\n 30 70  1  0  0  0  0\n 30 71  1  0  0  0  0\n 30 72  1  0  0  0  0\n  5 73  1  0  0  0  0\n  6 74  1  0  0  0  0\n 10 75  1  0  0  0  0\n 11 76  1  0  0  0  0\n 16 77  1  0  0  0  0\n 20 78  1  0  0  0  0\n 21 79  1  0  0  0  0\n 24 80  1  0  0  0  0\nM  </span><span class="re">END</span><span class="co">\n&lt;/structure&gt;&lt;type&gt;mol&lt;/type&gt;&lt;dimension&gt;3D&lt;/dimension&gt;&lt;defaultStructure&gt;false&lt;/defaultStructure&gt;&lt;/ChemicalStructures&gt;&lt;ChemicalStructures&gt;&lt;structure&gt;\n  Ketcher 05282116592D 1   1.00000     0.00000     0\n\n 30 29  0     0  0            999 V2000\n   -4.5490   -2.5073    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -5.4174   -3.0087    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -5.4174   -4.0117    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -4.5490   -4.5131    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.6804   -4.0117    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.6804   -3.0087    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.8118   -2.5073    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.8118   -4.5131    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.9433   -4.0117    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.9433   -3.0087    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.9433   -1.0029    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -2.8118   -1.5044    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.0748   -2.5073    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.0748   -1.5044    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.1210   -1.1944    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.1210   -2.8172    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.4685   -2.0058    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -5.0504   -5.3817    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.8398   -5.2223    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -3.6804   -2.0058    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.1210   -0.1915    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -0.9895    0.3100    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    0.7476    0.3100    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    1.6162   -0.1915    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.8000   -2.1849    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    2.4847    0.3100    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    3.3533   -0.1915    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    4.2218    0.3100    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n    3.3533   -1.1944    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n   -1.2270   -3.5818    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n  1  2  1  0     0  0\n  1  6  1  0     0  0\n  2  3  1  0     0  0\n  3  4  2  0     0  0\n  6  5  2  0     0  0\n  5  8  1  0     0  0\n  8  9  1  0     0  0\n  9 10  1  0     0  0\n  7 10  2  0     0  0\n 12  7  1  0     0  0\n 11 12  1  0     0  0\n 11 14  1  0     0  0\n 14 13  2  0     0  0\n 13 16  1  0     0  0\n 15 17  1  0     0  0\n 16 17  1  0     0  0\n  4 18  1  0     0  0\n  4 19  1  0     0  0\n  6 20  1  0     0  0\n 15 21  2  0     0  0\n 21 22  1  0     0  0\n 21 23  1  0     0  0\n 23 24  1  0     0  0\n 10 25  1  0     0  0\n 24 26  1  0     0  0\n 26 27  2  0     0  0\n 27 28  1  0     0  0\n 27 29  1  0     0  0\n 13 30  1  0     0  0\nM  </span><span class="re">END</span><span class="co">\n&lt;/structure&gt;&lt;type&gt;mol&lt;/type&gt;&lt;dimension&gt;2D&lt;/dimension&gt;&lt;defaultStructure&gt;false&lt;/defaultStructure&gt;&lt;/ChemicalStructures&gt;&lt;DatabaseLinks&gt;&lt;data&gt;C00003755&lt;/data&gt;&lt;type&gt;KNApSAcK accession&lt;/type&gt;&lt;/DatabaseLinks&gt;&lt;DatabaseLinks&gt;&lt;data&gt;C00751&lt;/data&gt;&lt;type&gt;KEGG COMPOUND accession&lt;/type&gt;&lt;/DatabaseLinks&gt;&lt;DatabaseLinks&gt;&lt;data&gt;HMDB0000256&lt;/data&gt;&lt;type&gt;HMDB accession&lt;/type&gt;&lt;/DatabaseLinks&gt;&lt;DatabaseLinks&gt;&lt;data&gt;LMPR0106010002&lt;/data&gt;&lt;type&gt;LIPID MAPS instance accession&lt;/type&gt;&lt;/DatabaseLinks&gt;&lt;DatabaseLinks&gt;&lt;data&gt;SQL&lt;/data&gt;&lt;type&gt;PDBeChem accession&lt;/type&gt;&lt;/DatabaseLinks&gt;&lt;DatabaseLinks&gt;&lt;data&gt;Squalene&lt;/data&gt;&lt;type&gt;Wikipedia accession&lt;/type&gt;&lt;/DatabaseLinks&gt;&lt;DatabaseLinks&gt;&lt;data&gt;SQUALENE&lt;/data&gt;&lt;type&gt;MetaCyc accession&lt;/type&gt;&lt;/DatabaseLinks&gt;&lt;OntologyParents&gt;&lt;chebiName&gt;Saccharomyces cerevisiae metabolite&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:75772&lt;/chebiId&gt;&lt;type&gt;has role&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyParents&gt;&lt;OntologyParents&gt;&lt;chebiName&gt;human metabolite&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:77746&lt;/chebiId&gt;&lt;type&gt;has role&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyParents&gt;&lt;OntologyParents&gt;&lt;chebiName&gt;mouse metabolite&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:75771&lt;/chebiId&gt;&lt;type&gt;has role&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyParents&gt;&lt;OntologyParents&gt;&lt;chebiName&gt;plant metabolite&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:76924&lt;/chebiId&gt;&lt;type&gt;has role&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyParents&gt;&lt;OntologyParents&gt;&lt;chebiName&gt;triterpene&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:35191&lt;/chebiId&gt;&lt;type&gt;is a&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyParents&gt;&lt;OntologyChildren&gt;&lt;chebiName&gt;tetrahydroxysqualene&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:66216&lt;/chebiId&gt;&lt;type&gt;has parent hydride&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyChildren&gt;&lt;OntologyChildren&gt;&lt;chebiName&gt;(R)-12-hydroxysqualene&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:88123&lt;/chebiId&gt;&lt;type&gt;has parent hydride&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyChildren&gt;&lt;OntologyChildren&gt;&lt;chebiName&gt;squalene triterpenoid&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:26747&lt;/chebiId&gt;&lt;type&gt;has parent hydride&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyChildren&gt;&lt;OntologyChildren&gt;&lt;chebiName&gt;3-methyl-1,2-didehydro-2,3-dihydrosqualene&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:70860&lt;/chebiId&gt;&lt;type&gt;has functional parent&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyChildren&gt;&lt;OntologyChildren&gt;&lt;chebiName&gt;(S)-2,3-epoxysqualene&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:15441&lt;/chebiId&gt;&lt;type&gt;has parent hydride&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyChildren&gt;&lt;OntologyChildren&gt;&lt;chebiName&gt;3,22-dimethyl-1,2,23,24-tetradehydro-2,3,22,23-tetrahydrosqualene&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:70861&lt;/chebiId&gt;&lt;type&gt;has functional parent&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyChildren&gt;&lt;OntologyChildren&gt;&lt;chebiName&gt;2,3-epoxysqualene&lt;/chebiName&gt;&lt;chebiId&gt;CHEBI:78662&lt;/chebiId&gt;&lt;type&gt;has parent hydride&lt;/type&gt;&lt;status&gt;CHECKED&lt;/status&gt;&lt;cyclicRelationship&gt;false&lt;/cyclicRelationship&gt;&lt;/OntologyChildren&gt;&lt;GeneralComments&gt;&lt;text&gt;Squalene is the biochemical precursor to the whole family of steroids. Oxidation (via squalene monooxygenase) of one of the terminal double bonds of squalene yields 2,3-squalene oxide, which undergoes enzyme-catalyzed cyclization to afford lanosterol, which is then elaborated into cholesterol and other steroids (Wikipedia).&lt;/text&gt;&lt;date&gt;2011-04-06&lt;/date&gt;&lt;/GeneralComments&gt;&lt;CompoundOrigins&gt;&lt;speciesText&gt;Rubia yunnanensis&lt;/speciesText&gt;&lt;speciesAccession&gt;IPNI:765385-1&lt;/speciesAccession&gt;&lt;componentText&gt;root&lt;/componentText&gt;&lt;componentAccession&gt;BTO:0001188&lt;/componentAccession&gt;&lt;SourceType&gt;PubMed Id&lt;/SourceType&gt;&lt;SourceAccession&gt;21973054&lt;/SourceAccession&gt;&lt;/CompoundOrigins&gt;&lt;CompoundOrigins&gt;&lt;speciesText&gt;Mus musculus&lt;/speciesText&gt;&lt;speciesAccession&gt;NCBI:txid10090&lt;/speciesAccession&gt;&lt;SourceType&gt;PubMed Id&lt;/SourceType&gt;&lt;SourceAccession&gt;19425150&lt;/SourceAccession&gt;&lt;/CompoundOrigins&gt;&lt;CompoundOrigins&gt;&lt;speciesText&gt;Centella asiatica&lt;/speciesText&gt;&lt;speciesAccession&gt;NCBI:txid48106&lt;/speciesAccession&gt;&lt;SourceType&gt;MetaboLights&lt;/SourceType&gt;&lt;SourceAccession&gt;MTBLS175&lt;/SourceAccession&gt;&lt;/CompoundOrigins&gt;&lt;CompoundOrigins&gt;&lt;speciesText&gt;Centella asiatica&lt;/speciesText&gt;&lt;speciesAccession&gt;NCBI:txid48106&lt;/speciesAccession&gt;&lt;SourceType&gt;MetaboLights&lt;/SourceType&gt;&lt;SourceAccession&gt;MTBLS175&lt;/SourceAccession&gt;&lt;/CompoundOrigins&gt;&lt;CompoundOrigins&gt;&lt;speciesText&gt;Saccharomyces cerevisiae&lt;/speciesText&gt;&lt;speciesAccession&gt;NCBI:txid4932&lt;/speciesAccession&gt;&lt;SourceType&gt;PubMed Id&lt;/SourceType&gt;&lt;SourceAccession&gt;24678285&lt;/SourceAccession&gt;&lt;/CompoundOrigins&gt;&lt;CompoundOrigins&gt;&lt;speciesText&gt;Homo sapiens&lt;/speciesText&gt;&lt;speciesAccession&gt;NCBI:txid9606&lt;/speciesAccession&gt;&lt;SourceType&gt;DOI&lt;/SourceType&gt;&lt;SourceAccession&gt;10.1038/nbt.2488&lt;/SourceAccession&gt;&lt;/CompoundOrigins&gt;&lt;CompoundOrigins&gt;&lt;speciesText&gt;Homo sapiens&lt;/speciesText&gt;&lt;speciesAccession&gt;NCBI:txid9606&lt;/speciesAccession&gt;&lt;componentText&gt;blood&lt;/componentText&gt;&lt;componentAccession&gt;UBERON:0000178&lt;/componentAccession&gt;&lt;SourceType&gt;PubMed Id&lt;/SourceType&gt;&lt;SourceAccession&gt;10487487&lt;/SourceAccession&gt;&lt;/CompoundOrigins&gt;&lt;/return&gt;&lt;/getCompleteEntityResponse&gt;&lt;/S:Body&gt;&lt;/S:Envelope&gt;&quot;</span></span></code></pre></div>
+<p>For building a POST request, see the documentation of the
+<code>Request</code> class.</p>
+</div>
+<div id="using-a-custom-rule" class="section level2">
+<h2>Using a custom rule</h2>
+<p>If no scheduling rule exists for a host name, <em>sched</em> uses a
+default rule of three requests per second (this default frequency may be
+changed when creating the <code>Scheduler</code> instance).</p>
+<p>To define a custom rule for a host name, use the
+<code>setRule()</code> method:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>scheduler<span class="sc">$</span><span class="fu">setRule</span>(<span class="st">&quot;www.ebi.ac.uk&quot;</span>, <span class="at">n =</span> <span class="dv">7</span>, <span class="at">lap =</span> <span class="dv">2</span>)</span></code></pre></div>
+<p>This call defines a new rule for domain <em>www.ebi.ac.uk</em>, that
+limits the number of request to 7 every 2 seconds. Note that the time
+lap is a sliding window, and <em>sched</em> registers the time of the
+requests. So supposing 7 requests have already been run during the 2
+seconds, the 8th request will be blocked, but only until the first one
+becomes 2 seconds old.</p>
+<p>To delete all defined rules, even the ones created automatically by
+<em>sched</em>, run:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>scheduler<span class="sc">$</span><span class="fu">deleteRules</span>()</span></code></pre></div>
+</div>
+<div id="downloading-a-file-from-a-url" class="section level2">
+<h2>Downloading a file from a URL</h2>
+<p>With <em>sched</em> it is also possible to download file directly
+from URLs and write them to disk.</p>
+<p>For this demonstration, we will use a destination folder:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>my_temp_dir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="fu">tempdir</span>(), <span class="st">&quot;my_temp_folder_for_sched_vignette&quot;</span>)</span></code></pre></div>
+<p>To download a file from a URL and write it directly on disk, use the
+<code>downloadFile()</code> method:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>my_url <span class="ot">&lt;-</span> sched<span class="sc">::</span>URL<span class="sc">$</span><span class="fu">new</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>  <span class="st">&quot;https://gitlab.com/cnrgh/databases/r-sched/-/raw/main/README.md&quot;</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>)</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>dst <span class="ot">&lt;-</span> <span class="fu">file.path</span>(my_temp_dir, <span class="st">&quot;readme.md&quot;</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>scheduler<span class="sc">$</span><span class="fu">downloadFile</span>(my_url, <span class="at">dest_file =</span> dst)</span></code></pre></div>
+<p>As with the <code>sendRequest()</code> method, the scheduler will use
+rules to limit access frequency to the domain name.</p>
+<p>Removal of the temporary folder:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">unlink</span>(my_temp_dir, <span class="at">recursive =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

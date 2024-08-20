@@ -154,6 +154,18 @@ scheduler <- sched::Scheduler$new(cache_dir = NULL)
 # Enable offline mode
 scheduler$setOffline(TRUE)
 
+
+## ------------------------------------------------
+## Method `Scheduler$isOffline`
+## ------------------------------------------------
+
+# Create a scheduler instance
+scheduler <- sched::Scheduler$new(cache_dir = NULL)
+
+# Test if offline mode is enabled
+if (scheduler$isOffline())
+  print("Scheduler is offline.")
+
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -167,6 +179,7 @@ scheduler$setOffline(TRUE)
 \item \href{#method-Scheduler-deleteRules}{\code{Scheduler$deleteRules()}}
 \item \href{#method-Scheduler-getNbRules}{\code{Scheduler$getNbRules()}}
 \item \href{#method-Scheduler-setOffline}{\code{Scheduler$setOffline()}}
+\item \href{#method-Scheduler-isOffline}{\code{Scheduler$isOffline()}}
 \item \href{#method-Scheduler-clone}{\code{Scheduler$clone()}}
 }
 }
@@ -561,6 +574,33 @@ scheduler <- sched::Scheduler$new(cache_dir = NULL)
 
 # Enable offline mode
 scheduler$setOffline(TRUE)
+
+}
+\if{html}{\out{</div>}}
+
+}
+
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Scheduler-isOffline"></a>}}
+\if{latex}{\out{\hypertarget{method-Scheduler-isOffline}{}}}
+\subsection{Method \code{isOffline()}}{
+Tests if offline mode is enabled.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Scheduler$isOffline()}\if{html}{\out{</div>}}
+}
+
+\subsection{Returns}{
+TRUE is offline mode is enabled, FALSE otherwise.
+}
+\subsection{Examples}{
+\if{html}{\out{<div class="r example copy">}}
+\preformatted{# Create a scheduler instance
+scheduler <- sched::Scheduler$new(cache_dir = NULL)
+
+# Test if offline mode is enabled
+if (scheduler$isOffline())
+  print("Scheduler is offline.")
 
 }
 \if{html}{\out{</div>}}

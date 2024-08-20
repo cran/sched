@@ -128,23 +128,37 @@ does_rcurl_request_url_exist <- function(request, useragent = NULL) {
   return(exists)
 }
 
-# Get URL content using RCurl::getURL().
+# Gets URL content using RCurl::getURL() or RCurl::getBinaryURL().
+#
+# binary Set to TRUE to get binary content (raw vector).
+# fail   Set to FALSE to return NULL instead of issuing an error or
+#        warning on request error.
+# RETURN NULL if connection could not be established or no response was
+#        received, otherwise a character or raw vector.
 get_rcurl_content <- function(u, opts = NULL, enc = integer(),
                               header_fct = NULL, ssl_verifypeer = TRUE,
-                              method = c("get", "post"), binary = FALSE) {
+                              method = c("get", "post"), binary = FALSE,
+                              fail = TRUE) {
 
   method <- match.arg(method)
   if (is.null(opts))
     opts <- list()
 
-  if (binary)
-    content <- RCurl::getBinaryURL(u, .opts = opts, .encoding = enc,
-                                   ssl.verifypeer = ssl_verifypeer,
-                                   headerfunction = header_fct)
-  else
-    content <- RCurl::getURL(u, .opts = opts, .encoding = enc,
-                             ssl.verifypeer = ssl_verifypeer,
-                             headerfunction = header_fct)
+  content <- tryCatch(
+    expr = {
+      if (binary)
+        RCurl::getBinaryURL(u, .opts = opts, .encoding = enc,
+                            ssl.verifypeer = ssl_verifypeer,
+                            headerfunction = header_fct)
+      else
+        RCurl::getURL(u, .opts = opts, .encoding = enc,
+                      ssl.verifypeer = ssl_verifypeer,
+                      headerfunction = header_fct)
+    },
+    error = function(e) if (fail) stop(e) else NULL,
+    warning = function(w) if (fail) warning(w) else NULL
+  )
+
 
   return(content)
 }
@@ -186,7 +200,7 @@ get_base_url_content <- function(u, binary = FALSE) {
   close(ud)
 
   # Convert to raw
-  if (binary)
+  if (binary && ! is.null(content))
     content <- charToRaw(content)
 
   return(content)
@@ -201,21 +215,20 @@ get_base_url_request_result <- function(request, binary = FALSE) {
     s_url
   ))
 
-  if (request$getMethod() != "get") {
-    msg <- sprintf("Request method \"%s\" is not hanlded by base::url().",
+  # GET method
+  if (request$getMethod() == "get") {
+
+    content <- get_base_url_content(s_url, binary = binary)
+
+    err <- if (is.null(content)) "Error when retrieving URL content" else
+      NULL
+
+  } else { # Method not handled
+    err <- sprintf("Request method \"%s\" is not hanlded by base::url().",
                    request$getMethod())
-    lgr::get_logger("sched")$fatal(msg)
-    stop(msg)
+    lgr::get_logger("sched")$fatal(err)
+    content <- NULL
   }
-
-  content <- get_base_url_content(s_url, binary = binary)
-
-  # NOTE For which case?
-  #  if (! is.null(content) && (! is.character(content) || content == ""))
-  #    content <- NULL # nolint: commented_code_linter
-
-  err <- if (is.null(content)) "Error when retrieving URL content" else
-    NULL
 
   status <- if (is.null(content))
     http_status$not_found # nolint: object_usage_linter

@@ -392,6 +392,23 @@ Scheduler <- R6::R6Class( # nolint: object_name_linter
       chk::chk_flag(offline)
       private$offline <- offline
       return(invisible(NULL))
+    },
+
+    #' @description
+    #' Tests if offline mode is enabled.
+    #'
+    #' @return TRUE is offline mode is enabled, FALSE otherwise.
+    #'
+    #' @examples
+    #' # Create a scheduler instance
+    #' scheduler <- sched::Scheduler$new(cache_dir = NULL)
+    #'
+    #' # Test if offline mode is enabled
+    #' if (scheduler$isOffline())
+    #'   print("Scheduler is offline.")
+    #'
+    isOffline = function() {
+      return(private$offline)
     }
   ),
 

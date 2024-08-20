@@ -60,7 +60,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
 { counter-reset: source-line 0; }
@@ -355,7 +355,7 @@ for a POST request.</p>
 request function:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>res <span class="ot">&lt;-</span> sched<span class="sc">::</span><span class="fu">get_url_request_result</span>(my_request)</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>res<span class="sc">$</span><span class="fu">getContent</span>()</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; [1] &quot;{\n  \&quot;args\&quot;: {}, \n  \&quot;data\&quot;: \&quot;{\\\&quot;some_key\\\&quot;: \\\&quot;my_value\\\&quot;}\&quot;, \n  \&quot;files\&quot;: {}, \n  \&quot;form\&quot;: {}, \n  \&quot;headers\&quot;: {\n    \&quot;Accept\&quot;: \&quot;application/json,multipart/*\&quot;, \n    \&quot;Content-Length\&quot;: \&quot;24\&quot;, \n    \&quot;Content-Type\&quot;: \&quot;application/json;charset=utf-8\&quot;, \n    \&quot;Host\&quot;: \&quot;httpbin.org\&quot;, \n    \&quot;X-Amzn-Trace-Id\&quot;: \&quot;Root=1-666b1659-161e9e9e1dc8ab5914ecded9\&quot;\n  }, \n  \&quot;json\&quot;: {\n    \&quot;some_key\&quot;: \&quot;my_value\&quot;\n  }, \n  \&quot;method\&quot;: \&quot;POST\&quot;, \n  \&quot;origin\&quot;: \&quot;193.50.0.200\&quot;, \n  \&quot;url\&quot;: \&quot;https://httpbin.org/anything\&quot;\n}\n&quot;</span></span></code></pre></div>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; [1] &quot;{\n  \&quot;args\&quot;: {}, \n  \&quot;data\&quot;: \&quot;{\\\&quot;some_key\\\&quot;: \\\&quot;my_value\\\&quot;}\&quot;, \n  \&quot;files\&quot;: {}, \n  \&quot;form\&quot;: {}, \n  \&quot;headers\&quot;: {\n    \&quot;Accept\&quot;: \&quot;application/json,multipart/*\&quot;, \n    \&quot;Content-Length\&quot;: \&quot;24\&quot;, \n    \&quot;Content-Type\&quot;: \&quot;application/json;charset=utf-8\&quot;, \n    \&quot;Host\&quot;: \&quot;httpbin.org\&quot;, \n    \&quot;X-Amzn-Trace-Id\&quot;: \&quot;Root=1-66c33e9b-10be9027246935bb3fac67dc\&quot;\n  }, \n  \&quot;json\&quot;: {\n    \&quot;some_key\&quot;: \&quot;my_value\&quot;\n  }, \n  \&quot;method\&quot;: \&quot;POST\&quot;, \n  \&quot;origin\&quot;: \&quot;91.171.160.208\&quot;, \n  \&quot;url\&quot;: \&quot;https://httpbin.org/anything\&quot;\n}\n&quot;</span></span></code></pre></div>
 </div>
 <div id="get_url_request_result" class="section level2">
 <h2><code>get_url_request_result()</code></h2>

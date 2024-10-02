@@ -138,7 +138,7 @@ Rule <- R6::R6Class("Rule", # nolint: object_name_linter
                                        private$times)
 
       # Sleep if needed
-      if (sleep_time > 0) {
+      if (sleep_time > 0.0) {
         lgr::get_logger("sched")$debug(sprintf("Wait %g second(s).",
                                                sleep_time))
         if (do_sleep)

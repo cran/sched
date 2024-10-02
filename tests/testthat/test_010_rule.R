@@ -84,8 +84,8 @@ testthat::test_that("wait() works fine", {
   }
 })
 
-testthat::test_that("Sys.sleep() inside wait() works fine", {
-  rule <- Rule$new(n = 1, lap = 0.01)
+testthat::test_that("Sys.sleep() inside wait() does not raise any error.", {
+  rule <- Rule$new(n = 1, lap = 0.5)
   testthat::expect_equal(rule$wait(), 0.0)
   testthat::expect_true(rule$wait() > 0.0)
 })
